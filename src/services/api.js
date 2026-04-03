@@ -2,38 +2,38 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const api = axios.create({
+const api = (axios && typeof axios.create === 'function') ? axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
-});
+}) : (axios || {});
 
-// Request interceptor
-api.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error)
-);
+if (api?.interceptors?.request) {
+  api.interceptors.request.use(
+    (config) => config,
+    (error) => Promise.reject(error)
+  );
+}
 
-// Response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized
-      localStorage.removeItem('session_id');
+if (api?.interceptors?.response) {
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('session_id');
+      }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
-);
+  );
+}
 
 // Auth APIs
 export const authAPI = {
-  sendOTP: (email) => api.post('/api/auth/send-otp', { email }),
-  verifyOTP: (email, otp) => api.post('/api/auth/verify-otp', { email, otp }),
-  logout: () => api.post('/api/auth/logout'),
-  checkSession: () => api.get('/api/auth/check-session'),
+  login: (email, password) => api.post('/api/auth/login', { email, password }),
+  logout: (sessionId) => api.post('/api/auth/logout', { session_id: sessionId }),
+  checkSession: (sessionId) => api.get('/api/auth/check-session', { headers: { 'x-session-id': sessionId || '' } }),
 };
 
 // Crop APIs
@@ -50,7 +50,7 @@ export const soilAPI = {
 // Weather APIs
 export const weatherAPI = {
   getWeather: (location) => api.get('/api/weather', { params: { location } }),
-  getAdvisory: (location) => api.get('/api/weather/advisory', { params: { location } }),
+  getAdvisory: ({ lat, lon, timezone } = {}) => api.get('/api/weather/advisory', { params: { lat, lon, timezone } }),
 };
 
 // Pest APIs

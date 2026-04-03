@@ -25,3 +25,23 @@ Relevant Stakeholders / Beneficiaries:
 Supporting Data:
 • 86% of Indian farmers are small or marginal (NABARD Report, 2022).
 • Studies show ICT-based advisories can increase crop yield by 20–30%.
+
+## Live Pest Model Setup
+
+The pest/disease detection API supports live model inference via Hugging Face.
+
+Optional environment variables for `backend`:
+
+- `HF_API_TOKEN`: Your Hugging Face access token (recommended for stable live inference)
+- `PEST_MODEL_IDS`: Comma-separated model ids to try in order
+  - Default:
+    - `linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification`
+    - `Diginsa/Plant-Disease-Detection-Project`
+
+Example (PowerShell):
+
+`$env:HF_API_TOKEN="your_token_here"`
+
+Then start backend:
+
+`npm start`

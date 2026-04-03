@@ -101,7 +101,7 @@ const PestDetection = () => {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Detect Disease
+              Detect Pest / Disease
             </span>
           )}
         </button>
@@ -121,12 +121,32 @@ const PestDetection = () => {
             </svg>
             {t('pest.detected')}: <span className="capitalize">{result.disease_detected}</span>
           </h3>
+          {result.detection_type && result.detection_type !== 'unknown' && (
+            <p className={`text-sm mb-2 ${
+              result.is_reliable !== false ? 'text-blue-700' : 'text-yellow-700'
+            }`}>
+              <span className="font-medium">Type:</span> {result.detection_type === 'pest' ? 'Pest' : 'Disease'}
+            </p>
+          )}
+          {result.model_label && (
+            <p className="text-xs text-gray-600 mb-2">
+              Photo analysis label: {result.model_label}
+            </p>
+          )}
+          {result.model_provider && (
+            <p className="text-xs text-gray-600 mb-2">
+              Model: {result.model_provider}{result.model_id ? ` (${result.model_id})` : ''}
+            </p>
+          )}
           
-          {/* Warning only for Unknown / Unable to Classify */}
-          {result.warning && 
-           (result.disease_detected === 'Unable to Classify' || result.disease_detected === 'Unknown / Uncertain') && (
-            <div className="mb-3 p-2 border rounded text-sm bg-red-100 border-red-400 text-red-800">
-              ❌ {result.warning}
+          {result.photo_tip && (
+            <div className="mb-3 p-2 border rounded text-sm bg-blue-50 border-blue-200 text-blue-800">
+              {result.photo_tip}
+            </div>
+          )}
+          {result.warning && (
+            <div className="mb-3 p-2 border rounded text-sm bg-yellow-100 border-yellow-400 text-yellow-800">
+              {result.warning}
             </div>
           )}
           

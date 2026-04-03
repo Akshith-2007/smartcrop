@@ -25,23 +25,18 @@ function App() {
     try {
       const sessionId = localStorage.getItem('session_id');
       const email = localStorage.getItem('email');
-      
+
       if (sessionId && email) {
-        const response = await authAPI.checkSession();
+        const response = await authAPI.checkSession(sessionId);
         if (response.data && response.data.authenticated) {
-          setUser({ email: response.data.email });
+          setUser({ email: response.data.email || email });
         } else {
           localStorage.removeItem('session_id');
           localStorage.removeItem('email');
         }
-      } else {
-        // No session info, just set loading to false
-        setLoading(false);
       }
     } catch (err) {
       console.error('Session check error:', err);
-      // Don't clear on error - might be network issue
-      // Only clear if it's a 401
       if (err.response?.status === 401) {
         localStorage.removeItem('session_id');
         localStorage.removeItem('email');

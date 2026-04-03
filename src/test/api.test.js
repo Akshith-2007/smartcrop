@@ -1,9 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { authAPI, cropAPI, soilAPI, weatherAPI, marketAPI } from '../services/api'
-import axios from 'axios'
 
-// Mock axios
-vi.mock('axios')
+vi.mock('axios', () => {
+  const axiosMock = {
+    create: vi.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
+  }
+  axiosMock.create.mockReturnValue(axiosMock)
+  return { default: axiosMock }
+})
+
+import axios from 'axios'
+import { authAPI, cropAPI, soilAPI, weatherAPI, marketAPI } from '../services/api'
 
 describe('API Service Tests', () => {
   beforeEach(() => {
@@ -11,22 +23,22 @@ describe('API Service Tests', () => {
   })
 
   describe('Auth API', () => {
-    it('should send OTP', async () => {
-      const mockResponse = { data: { message: 'OTP sent', email: 'test@example.com' } }
+    it('should login with email and password', async () => {
+      const mockResponse = { data: { authenticated: true, session_id: '123', email: 'test@example.com' } }
       axios.post.mockResolvedValue(mockResponse)
 
-      const result = await authAPI.sendOTP('test@example.com')
-      expect(result.data.message).toBe('OTP sent')
-      expect(axios.post).toHaveBeenCalledWith('/api/auth/send-otp', { email: 'test@example.com' })
+      const result = await authAPI.login('test@example.com', 'password123')
+      expect(result.data.session_id).toBe('123')
+      expect(axios.post).toHaveBeenCalledWith('/api/auth/login', { email: 'test@example.com', password: 'password123' })
     })
 
-    it('should verify OTP', async () => {
-      const mockResponse = { data: { message: 'Success', session_id: '123', email: 'test@example.com' } }
-      axios.post.mockResolvedValue(mockResponse)
+    it('should check session', async () => {
+      const mockResponse = { data: { authenticated: true, email: 'test@example.com' } }
+      axios.get.mockResolvedValue(mockResponse)
 
-      const result = await authAPI.verifyOTP('test@example.com', '123456')
-      expect(result.data.session_id).toBe('123')
-      expect(axios.post).toHaveBeenCalledWith('/api/auth/verify-otp', { email: 'test@example.com', otp: '123456' })
+      const result = await authAPI.checkSession('123')
+      expect(result.data.authenticated).toBe(true)
+      expect(axios.get).toHaveBeenCalledWith('/api/auth/check-session', { headers: { 'x-session-id': '123' } })
     })
   })
 
@@ -46,9 +58,9 @@ describe('API Service Tests', () => {
       const mockResponse = { data: { weather: {}, alerts: [] } }
       axios.get.mockResolvedValue(mockResponse)
 
-      const result = await weatherAPI.getAdvisory('Visakhapatnam')
+      const result = await weatherAPI.getAdvisory({ lat: 17.68, lon: 83.22, timezone: 'Asia/Kolkata' })
       expect(result.data).toHaveProperty('weather')
-      expect(axios.get).toHaveBeenCalledWith('/api/weather/advisory', { params: { location: 'Visakhapatnam' } })
+      expect(axios.get).toHaveBeenCalledWith('/api/weather/advisory', { params: { lat: 17.68, lon: 83.22, timezone: 'Asia/Kolkata' } })
     })
   })
 })

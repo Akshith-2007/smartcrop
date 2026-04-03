@@ -5,6 +5,7 @@ import { marketAPI } from '../services/api';
 const MarketPrices = () => {
   const { t } = useLanguage();
   const [prices, setPrices] = useState([]);
+  const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
@@ -23,6 +24,10 @@ const MarketPrices = () => {
         ...(filter && { crop: filter })
       });
       setPrices(response.data.prices || []);
+      setMeta({
+        source: response.data.source,
+        updatedAt: response.data.updated_at,
+      });
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message || 'Failed to fetch market prices';
       console.error('Market Prices API error:', err);
@@ -88,6 +93,11 @@ const MarketPrices = () => {
       </div>
 
       <div className="mb-5">
+        {meta.source && (
+          <div className="mb-3 text-xs text-gray-500">
+            Source: {meta.source} | Updated: {meta.updatedAt ? new Date(meta.updatedAt).toLocaleString() : 'N/A'}
+          </div>
+        )}
         <input
           type="text"
           placeholder={t('market.filter')}
@@ -133,6 +143,9 @@ const MarketPrices = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-bold text-primary-700">₹{price.price_per_quintal}</span>
                     <span className="text-xs text-gray-500 ml-1">/Quintal</span>
+                    {price.trend && (
+                      <span className="ml-2 text-xs">{getTrendIcon(price.trend)}</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-700 flex items-center gap-1">

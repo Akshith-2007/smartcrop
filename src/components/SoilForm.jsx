@@ -52,6 +52,15 @@ const SoilForm = ({ onResult }) => {
       const finalResult = {
         soilAnalysis: soilResponse.data,
         cropRecommendations: cropResponse.data,
+        inputData: {
+          ph: parseFloat(formData.ph),
+          nitrogen: parseFloat(formData.nitrogen),
+          phosphorus: parseFloat(formData.phosphorus),
+          potassium: parseFloat(formData.potassium),
+          moisture: parseFloat(formData.moisture),
+          region: formData.region,
+          season: formData.season,
+        },
       };
 
       setResult(finalResult);

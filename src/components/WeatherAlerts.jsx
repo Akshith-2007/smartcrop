@@ -17,7 +17,28 @@ const WeatherAlerts = () => {
     setError('');
     
     try {
-      const response = await weatherAPI.getAdvisory('Visakhapatnam');
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      let response;
+
+      if (navigator.geolocation) {
+        const getCurrentPosition = () =>
+          new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
+          });
+
+        try {
+          const position = await getCurrentPosition();
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          response = await weatherAPI.getAdvisory({ lat, lon, timezone });
+        } catch (geoError) {
+          response = await weatherAPI.getAdvisory({ timezone });
+          setError('Location permission not granted. Showing nearest default weather.');
+        }
+      } else {
+        response = await weatherAPI.getAdvisory({ timezone });
+      }
+
       setWeather(response.data);
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message || 'Failed to fetch weather';
@@ -98,6 +119,10 @@ const WeatherAlerts = () => {
 
       {weather && (
         <>
+          <div className="mb-4 text-xs text-gray-500">
+            Last updated: {weather.updated_at ? new Date(weather.updated_at).toLocaleString() : 'N/A'}
+            {weather.location?.timezone ? ` | Timezone: ${weather.location.timezone}` : ''}
+          </div>
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-shadow">
               <svg className="w-6 h-6 text-blue-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

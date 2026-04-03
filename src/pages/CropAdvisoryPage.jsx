@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useFarm } from '../context/FarmContext';
 import CropRecommendation from '../components/CropRecommendation';
+import FertilizerSchedule from '../components/FertilizerSchedule';
 
 const CropAdvisoryPage = () => {
   const { t } = useLanguage();
-  const { cropRecommendations } = useFarm();
+  const { cropRecommendations, soilResult } = useFarm();
+  const [selectedCrop, setSelectedCrop] = useState(null);
+
+  // Automatically select the first crop if not selected and recommendations exist
+  React.useEffect(() => {
+    if (cropRecommendations?.length > 0 && !selectedCrop) {
+      setSelectedCrop(cropRecommendations[0]);
+    }
+  }, [cropRecommendations, selectedCrop]);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-12">
       {/* Page Header */}
       <div className="card p-6 md:p-8">
         <div className="flex items-center gap-4">
@@ -20,7 +29,7 @@ const CropAdvisoryPage = () => {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 font-display">{t('crop.recommendations')}</h1>
-            <p className="text-gray-600 mt-1">Get personalized crop recommendations based on your soil analysis</p>
+            <p className="text-gray-600 mt-1">Get personalized crop recommendations and fertilizer schedules based on your soil analysis</p>
           </div>
         </div>
       </div>
@@ -49,7 +58,19 @@ const CropAdvisoryPage = () => {
           </div>
         </div>
       ) : (
-        <CropRecommendation recommendations={cropRecommendations} />
+        <>
+          <CropRecommendation 
+            recommendations={cropRecommendations} 
+            selectedCrop={selectedCrop}
+            onSelectCrop={setSelectedCrop}
+          />
+          {selectedCrop && (
+            <FertilizerSchedule 
+              selectedCrop={selectedCrop} 
+              soilResult={soilResult} 
+            />
+          )}
+        </>
       )}
     </div>
   );

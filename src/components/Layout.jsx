@@ -130,10 +130,7 @@ const Layout = ({ user, onLogout, children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-sm">
-              Smart Crop Advisory System © 2024. Empowering farmers with AI-driven recommendations.
-            </p>
-            <p className="text-xs text-gray-500 mt-2">
-              The UI redesign enhances visual clarity and usability while preserving complete functional integrity of the original system.
+              Smart Crop Advisory System
             </p>
           </div>
         </div>
