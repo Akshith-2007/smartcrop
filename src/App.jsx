@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import { FarmProvider } from './context/FarmContext';
-import { authAPI } from './services/api';
 import Login from './components/Login';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -14,37 +13,8 @@ import PestDetectionPage from './pages/PestDetectionPage';
 import MarketPricesPage from './pages/MarketPricesPage';
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkSession();
-  }, []);
-
-  const checkSession = async () => {
-    try {
-      const sessionId = localStorage.getItem('session_id');
-      const email = localStorage.getItem('email');
-
-      if (sessionId && email) {
-        const response = await authAPI.checkSession(sessionId);
-        if (response.data && response.data.authenticated) {
-          setUser({ email: response.data.email || email });
-        } else {
-          localStorage.removeItem('session_id');
-          localStorage.removeItem('email');
-        }
-      }
-    } catch (err) {
-      console.error('Session check error:', err);
-      if (err.response?.status === 401) {
-        localStorage.removeItem('session_id');
-        localStorage.removeItem('email');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [user, setUser] = useState({ email: 'demo@local', name: 'Demo User' });
+  const [loading] = useState(false);
 
   const handleLogin = (userData) => {
     setUser(userData);
